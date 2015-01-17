@@ -3,6 +3,7 @@
 A set of small utilities.
 
 * get_mac : returns the MAC address of the interface.
+* get_ip  : returns the IPv4 address of the interface.
 
 ## Installation
 
@@ -23,6 +24,7 @@ Or install it yourself as:
 ## Usage
 
     Hvutils.get_mac('eth0') => mac address as string
+    Hvutils.get_ip('eth0') => ip address as string
 
 ## Contributing
 
