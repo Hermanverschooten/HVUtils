@@ -20,7 +20,8 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    $ GetMac.string('eth0') => mac address as string
+    $ GetMac.numeric('eth0') => mac address as number
 
 ## Contributing
 
