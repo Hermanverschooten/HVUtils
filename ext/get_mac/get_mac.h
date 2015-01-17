@@ -10,8 +10,8 @@
 
 #define VERSION "0.0.1"
 
-VALUE method_get_string(VALUE, VALUE);
-VALUE method_get_numeric(VALUE, VALUE);
+VALUE method_get_mac(VALUE, VALUE);
+
 char *get_iface_mac(const char *ifname);
 
 #endif

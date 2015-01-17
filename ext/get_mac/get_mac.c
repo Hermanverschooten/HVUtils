@@ -27,10 +27,10 @@ VALUE GetMac = Qnil;
 
 void Init_get_mac() {
     GetMac = rb_define_module("Hvutils");
-    rb_define_module_function(GetMac, "get_mac", method_get_string, 1);
+    rb_define_module_function(GetMac, "get_mac", method_get_mac, 1);
 }
 
-VALUE method_get_string(VALUE self, VALUE interface) {
+VALUE method_get_mac(VALUE self, VALUE interface) {
     char* iface = StringValueCStr(interface);
     char* mac = get_iface_mac(iface);
     VALUE rc = Qnil;
