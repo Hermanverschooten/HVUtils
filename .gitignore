@@ -13,3 +13,5 @@
 *.a
 mkmf.log
 Makefile
+Vagrantfile
+.vagrant

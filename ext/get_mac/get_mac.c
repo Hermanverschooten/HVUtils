@@ -9,17 +9,25 @@
 #include <get_mac.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <ifaddrs.h>
 #include <string.h>
 #include <errno.h>
+#ifdef _DARWIN_C_SOURCE
+#include <sys/socket.h>
 #include <net/if_dl.h>
+#include <ifaddrs.h>
+#endif
+#ifdef __linux__
+#include <net/if.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#endif
+
 
 VALUE GetMac = Qnil;
 
 void Init_get_mac() {
-    GetMac = rb_define_module("GetMac");
-    rb_define_module_function(GetMac, "string", method_get_string, 1);
+    GetMac = rb_define_module("Hvutils");
+    rb_define_module_function(GetMac, "get_mac", method_get_string, 1);
 }
 
 VALUE method_get_string(VALUE self, VALUE interface) {
@@ -34,36 +42,33 @@ VALUE method_get_string(VALUE self, VALUE interface) {
 
 char *
 get_iface_mac(const char *ifname) {
-#ifdef OS_UNIX
+#if defined(__linux__)
     int r, s;
     struct ifreq ifr;
     char *hwaddr, mac[13];
 
     strcpy(ifr.ifr_name, ifname);
 
-    s = socket(AF_PACKET, SOCK_DGRAM, 0);
+    s = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (-1 == s) {
-        printf("get_iface_mac socket: %s", strerror(errno));
+        printf("get_iface_mac socket: %s\n", strerror(errno));
         return NULL;
     }
 
     r = ioctl(s, SIOCGIFHWADDR, &ifr);
     if (r == -1) {
-        printf("get_iface_mac ioctl(SIOCGIFHWADDR): %s", strerror(errno));
+        printf("get_iface_mac ioctl(SIOCGIFHWADDR): %s\n", strerror(errno));
         close(s);
         return NULL;
     }
 
     hwaddr = ifr.ifr_hwaddr.sa_data;
     close(s);
+
     snprintf(mac, sizeof (mac), "%02X%02X%02X%02X%02X%02X",
-            hwaddr[0] & 0xFF,
-            hwaddr[1] & 0xFF,
-            hwaddr[2] & 0xFF,
-            hwaddr[3] & 0xFF,
-            hwaddr[4] & 0xFF,
-            hwaddr[5] & 0xFF
-            );
+            hwaddr[0] & 0xFF, hwaddr[1] & 0xFF,
+            hwaddr[2] & 0xFF, hwaddr[3] & 0xFF,
+            hwaddr[4] & 0xFF, hwaddr[5] & 0xFF);
 
     return strdup(mac);
 #elif defined(_DARWIN_C_SOURCE)

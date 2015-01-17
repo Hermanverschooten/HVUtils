@@ -1,7 +1,11 @@
-require 'get_mac'
+require 'hvutils'
 
-describe GetMac do
-  it 'returns a mac address as string' do
-    expect(GetMac.string('en0')).to eql('685B35B24DD5')
+describe Hvutils do
+  let(:interface) {  RbConfig::CONFIG['host_os'] =~ /darwin/i ? 'en0' : 'eth0' }
+
+  it 'returns the mac address for an interface' do
+    expect(Hvutils.get_mac(interface)).to match(/[0-9A-F]{12}/)
   end
+
+  it 'returns the ip address for an interface'
 end
