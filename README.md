@@ -1,13 +1,15 @@
-# Getmac
+# Hvutils
 
-TODO: Write a gem description
+A set of small utilities.
+
+* get_mac : returns the MAC address of the interface.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'getmac'
+gem 'hvutils'
 ```
 
 And then execute:
@@ -16,12 +18,11 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install getmac
+    $ gem install hvutils 
 
 ## Usage
 
-    GetMac.string('eth0') => mac address as string
-    GetMac.numeric('eth0') => mac address as number
+    Hvutils.get_mac('eth0') => mac address as string
 
 ## Contributing
 
