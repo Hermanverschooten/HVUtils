@@ -7,17 +7,10 @@
  */
 #include <ruby.h>
 #include <arp_get.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <net/if_arp.h>
 #include <sys/ioctl.h>
-#ifdef __linux__
-#include <net/if.h>
-#include <netinet/in.h>
-#endif
 
 
 VALUE Module = Qnil;
@@ -28,38 +21,24 @@ void Init_arp_get() {
 }
 
 VALUE method_arp_get(VALUE self, VALUE interface, VALUE ipaddress) {
-    char* iface = StringValueCStr(interface);
-    char* ip = StringValueCStr(ipaddress);
-    char* mac = arp_get(iface,ip);
-    VALUE rc = Qnil;
-    if(mac!= NULL)
-        rc = rb_str_new2(mac);
-    free(mac);
-    return rc;
-}
-
-/*
- * Get the MAC address associated with the given IP address.
- */
-char *
-arp_get(char* iface, char *req_ip){
 #if defined(__linux__)
+    char* iface = StringValueCStr(interface);
+    char* req_ip = StringValueCStr(ipaddress);
     int s;
     struct  sockaddr_in *sin;
     struct  in_addr     ipaddr;
     struct arpreq       areq;
     char                mac[18];
-    char                *reply = NULL;
     unsigned char *ptr ;
 
     if((s=socket(AF_INET, SOCK_DGRAM,0)) == -1){
-        printf("Could not create socket in arp_get");
-        return NULL;
+        rb_raise(rb_eIOError, "Could not create socket in arp_get");
+        return Qnil;
     }
 
     memset(&areq, 0, sizeof(areq));
     sin = (struct sockaddr_in *) &areq.arp_pa;
-    inet_aton(req_ip, &ipaddr);
+    inet_pton(AF_INET, req_ip, &ipaddr);
     sin->sin_addr = ipaddr;
     sin->sin_family = AF_INET;
 
@@ -69,9 +48,10 @@ arp_get(char* iface, char *req_ip){
     strncpy(areq.arp_dev,iface, 15);
 
     if (ioctl(s,SIOCGARP, (caddr_t) &areq)==-1){
-        printf( "Unable to make ARP request");
         close(s);
-        return NULL;
+        if(errno != ENXIO)
+            rb_raise(rb_eIOError,"Unable to make ARP request, %s", strerror(errno));
+        return Qnil;
     }
     close(s);
 
@@ -80,11 +60,8 @@ arp_get(char* iface, char *req_ip){
             (ptr[0] & 0377), (ptr[1] & 0377),
             (ptr[2] & 0377), (ptr[3] & 0377),
             (ptr[4] & 0377), (ptr[5] & 0377));
-    reply = strdup(mac);
-    printf("arp_get: Found IP %s, mac %s",req_ip, mac);
-
-    return reply;
+    return rb_str_new2(mac);
 #else
-    return NULL;
+    return Qnil;
 #endif
 }

@@ -10,5 +10,4 @@
 
 VALUE method_arp_get(VALUE, VALUE, VALUE);
 
-char * arp_get(char *, char *);
 #endif
