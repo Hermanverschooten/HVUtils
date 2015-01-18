@@ -33,15 +33,15 @@ void Init_get_ip() {
 
 VALUE method_get_ip(VALUE self, VALUE interface) {
     char* iface = StringValueCStr(interface);
-    char* ip = get_iface_ip(iface);
+    char ip[INET_ADDRSTRLEN];
     VALUE rc = Qnil;
-    if(ip != NULL)
+    if(get_iface_ip(iface, ip)==0)
         rc = rb_str_new2(ip);
     return rc;
 }
 
-char *
-get_iface_ip(const char *ifname) {
+int
+get_iface_ip(const char *ifname, char *result) {
 #if defined(__linux__)
     struct ifreq if_data;
     int sockd;
@@ -49,7 +49,7 @@ get_iface_ip(const char *ifname) {
 
     if((sockd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0) {
         printf("get_iface_ip socket(): %s\n", strerror(errno));
-        return NULL;
+        return -1;
     }
 
     strcpy(if_data.ifr_name, ifname);
@@ -57,22 +57,23 @@ get_iface_ip(const char *ifname) {
     if(ioctl(sockd, SIOCGIFADDR, &if_data) < 0) {
         printf("get_iface_ip ioctl(SIOCGIFADDR): %s\n", strerror(errno));
         close(sockd);
-        return NULL;
+        return -1;
     }
 
     close(sockd);
 
     ipaddr = (struct sockaddr_in*)&if_data.ifr_addr;
 
-    return inet_ntoa(ipaddr->sin_addr);
+    inet_ntop(AF_INET, &(ipaddr->sin_addr), result, INET_ADDRSTRLEN);
+    return 0;
+
 #elif defined(_DARWIN_C_SOURCE)
     struct ifaddrs *ifa, *ifap;
-    char *str = NULL;
     struct sockaddr_in* ipaddr;
 
     if (getifaddrs(&ifap) == -1) {
         printf("get_iface_ip getifaddrs(): %s", strerror(errno));
-        return NULL;
+        return -1;
     }
     for (ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) {
         if (strcmp(ifa->ifa_name, ifname) == 0 &&
@@ -81,16 +82,18 @@ get_iface_ip(const char *ifname) {
     }
     if (ifa == NULL) {
         printf("%s: no IPV4 address assigned", ifname);
-        goto out;
+        freeifaddrs(ifap);
+        return -1;
     }
 
-    str = inet_ntoa(((struct sockaddr_in *) ifa->ifa_addr)->sin_addr);
+    ipaddr = (struct sockaddr_in *) ifa->ifa_addr;
 
-out:
+    inet_ntop(AF_INET, &(ipaddr->sin_addr), result, INET_ADDRSTRLEN);
+
     freeifaddrs(ifap);
-    return str;
+    return 0;
 #else
-    return NULL ;
+    return -1 ;
 #endif
 }
 
