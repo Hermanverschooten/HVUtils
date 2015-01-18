@@ -10,6 +10,4 @@
 
 VALUE method_get_ip(VALUE, VALUE);
 
-int get_iface_ip(const char *,char *);
-
 #endif
