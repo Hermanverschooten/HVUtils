@@ -43,7 +43,7 @@ VALUE method_get_ip(VALUE self, VALUE interface) {
 
     if(ioctl(sockd, SIOCGIFADDR, &if_data) < 0) {
         close(sockd);
-        rb_raise(rb_eStandardError,"%s", strerror(errno));
+        rb_raise(rb_eRuntimeError,"%s", strerror(errno));
         return Qnil;
     }
 
@@ -68,7 +68,7 @@ VALUE method_get_ip(VALUE self, VALUE interface) {
     }
     if (ifa == NULL) {
         freeifaddrs(ifap);
-        rb_raise(rb_eStandardError, "%s: no IPV4 address assigned", iface);
+        rb_raise(rb_eRuntimeError, "%s: no IPV4 address assigned", iface);
         return Qnil;
     }
 
