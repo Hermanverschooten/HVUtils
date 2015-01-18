@@ -13,3 +13,7 @@ Rake::ExtensionTask.new('arp_get') do |ext|
   ext.lib_dir = "lib/hvutils"
 end
 
+Rake::ExtensionTask.new('sysinfo') do |ext|
+  ext.lib_dir = "lib/hvutils"
+end
+
