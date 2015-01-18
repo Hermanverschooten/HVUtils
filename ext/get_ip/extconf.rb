@@ -1,3 +1,3 @@
 require 'mkmf'
-create_makefile('get_ip')
+create_makefile('hvutils/get_ip')
 

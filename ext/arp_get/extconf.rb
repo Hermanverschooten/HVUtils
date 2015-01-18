@@ -1,3 +1,3 @@
 require 'mkmf'
-create_makefile('arp_get')
+create_makefile('hvutils/arp_get')
 

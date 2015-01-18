@@ -1,3 +1,3 @@
 require 'mkmf'
-create_makefile('get_mac')
+create_makefile('hvutils/get_mac')
 
