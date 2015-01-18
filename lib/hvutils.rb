@@ -1,6 +1,7 @@
 require "hvutils/version"
 require "hvutils/get_mac"
 require "hvutils/get_ip"
+require "hvutils/arp_get"
 
 module Hvutils
   # Your code goes here...

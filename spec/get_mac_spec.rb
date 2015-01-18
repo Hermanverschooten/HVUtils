@@ -10,4 +10,11 @@ describe Hvutils do
   it 'returns the ip address for an interface' do
     expect(Hvutils.get_ip(interface)).to match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)
   end
+
+  it 'finds the mac address of an ip on an interface' do
+    if interface == 'eth0'
+      ip = '10.211.55.2'
+      expect(Hvutils.arp_get(interface,ip)).to match(/([0-9A-F]{2}\:){5}[0-9A-F]{2}/i)
+    end
+  end
 end
